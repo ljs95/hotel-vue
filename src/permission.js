@@ -5,6 +5,7 @@ import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
+import { getRoutes } from '@/utils/menu'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
@@ -34,12 +35,14 @@ router.beforeEach(async(to, from, next) => {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          const { roles } = await store.dispatch('user/getInfo')
+          await store.dispatch('user/getInfo')
 
-          const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
+          // 获取用户的动态路由
+          const routes = await getRoutes()
+          await store.dispatch('permission/generateRoutes', routes)
 
           // dynamically add accessible routes
-          router.addRoutes(accessRoutes)
+          router.addRoutes(routes)
 
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
