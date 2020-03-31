@@ -1,108 +1,104 @@
 <template>
   <div v-loading="loading" class="app-container">
-    <el-button type="success" @click="loadTable"> 刷新表格 </el-button>
-    <el-button type="primary" @click="handleCreate"> 添加用户 </el-button>
-    <el-table
-      :data="tableData"
-      border
-      style="width: 100%; margin-top: 10px"
-    >
-      <el-table-column
-        type="index"
-        label="序号"
-        width="50"
-        align="center"
+    <div>
+      <el-input v-model.trim="where.username" style="width: 200px" placeholder="账号" />
+      <el-input v-model.trim="where.nickname" style="width: 200px" placeholder="昵称" />
+      <el-select v-model="where.enabled" style="width: 200px" placeholder="启/禁用">
+        <el-option label="启用" value="true"/>
+        <el-option label="禁用" value="false"/>
+      </el-select>
+      <el-button type="success" @click="loadTable"> 查询</el-button>
+      <el-button type="primary" @click="handleCreate"> 添加用户</el-button>
+    </div>
+    <div>
+      <el-table
+        :data="tableData"
+        border
+        style="width: 100%; margin-top: 10px"
+      >
+        <el-table-column
+          type="index"
+          label="序号"
+          width="50"
+          align="center"
+        />
+        <el-table-column
+          prop="username"
+          label="账号"
+          width="200"
+          align="center"
+        />
+        <el-table-column
+          prop="nickname"
+          label="昵称"
+          width="200"
+          align="center"
+        />
+        <el-table-column
+          label="头像"
+          width="100"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <img :src="scope.row.userImg" width="50px" height="50px">
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="用户状态"
+          width="120"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <p v-if="scope.row.enabled"> 启用 </p>
+            <p v-else> 禁用
+            </p>
+            <p />
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="启/禁用操作"
+          width="200"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-button v-if="scope.row.enabled" size="mini" type="danger" @click="updateEnable(scope.row)"> 禁用
+            </el-button>
+            <el-button v-else size="mini" type="success" @click="updateEnable(scope.row)"> 启用</el-button>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          width="250"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.row)"
+            >编辑
+            </el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.row)"
+            >删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        style="margin-top: 10px"
+        :current-page="listQuery.page"
+        :page-size="listQuery.limit"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
       />
-      <el-table-column
-        prop="username"
-        label="账号"
-        width="200"
-        align="center"
-      />
-      <el-table-column
-        prop="nickname"
-        label="昵称"
-        width="200"
-        align="center"
-      />
-      <el-table-column
-        prop="email"
-        label="邮箱"
-        width="250"
-        align="center"
-      />
-      <el-table-column
-        label="头像"
-        width="100"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <img :src="scope.row.avatar" width="50px" height="50px">
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="用户状态"
-        width="120"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <p v-if="scope.row.enabled === 1"> 启用 </p>
-          <p v-else> 禁用
-          </p><p />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="启/禁用操作"
-        width="200"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <el-button v-if="scope.row.enabled === 1" size="mini" type="danger" @click="updateEnable(scope.row)"> 禁用
-          </el-button>
-          <el-button v-else size="mini" type="success" @click="updateEnable(scope.row)"> 启用</el-button>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        width="200"
-        align="center"
-      >
-        <template v-if="scope.row.create_time" slot-scope="scope">
-          {{ scope.row.create_time | formatDateTime }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="操作"
-        width="250"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="handleEdit(scope.row)"
-          >编辑
-          </el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.row)"
-          >删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      style="margin-top: 10px"
-      :current-page="listQuery.page"
-      :page-size="listQuery.limit"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
-    <el-dialog title="用户信息" :visible.sync="showEdit">
-      <admin-edit ref="adminEdit" :is-create="isCreate" @success="successEdit" />
-    </el-dialog>
+      <el-dialog title="用户信息" :visible.sync="showEdit">
+        <admin-edit ref="adminEdit" :is-create="isCreate" @success="successEdit" />
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -122,6 +118,12 @@ export default {
         page: 1,
         limit: 10
       },
+      where: {
+        username: null,
+        nickname: null,
+        enabled: null
+      },
+      enabledList: [],
       loading: false,
       showEdit: false,
       isCreate: true
@@ -142,12 +144,15 @@ export default {
     // 加载table数据
     async loadTable() {
       this.loading = true
-      const { code, data, count } = await this.postRequest('/basic.admin/table',
-        { page: this.listQuery.page, limit: this.listQuery.limit })
-      if (code === 0) {
-        this.tableData = data
-        this.total = count
-      }
+      const { data } = await this.postRequest(`/basic/admin/table`, {
+        page: this.listQuery.page,
+        size: this.listQuery.limit,
+        username: this.where.username,
+        nickname: this.where.nickname,
+        enabled: this.where.enabled
+      })
+      this.tableData = data.data
+      this.total = data.count
       this.loading = false
     },
     // 更新用户状态
@@ -161,7 +166,7 @@ export default {
           center: true
         })
         this.loading = true
-        const data = await this.postRequest('/basic.admin/enabled', { id: row.id, enabled: !row.enabled })
+        const data = await this.postRequest('/basic/admin/enabled', { id: row.id, enabled: !row.enabled })
 
         this.loading = false
         if (data) {
@@ -193,7 +198,7 @@ export default {
         })
 
         this.loading = true
-        const data = await this.deleteRequest(`/basic.admin/delete/${row.id}`)
+        const data = await this.deleteRequest(`/basic/admin/delete/${row.id}`)
         this.loading = false
 
         this.$message({ message: data.msg, type: 'success' })

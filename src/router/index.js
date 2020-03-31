@@ -65,13 +65,41 @@ export const constantRoutes = [
   }
 ]
 
-// 路由Map
-export const routerMap = {
-  'layout': Layout,
-  '/basic/admin': () => import('@/views/basic/admin'),
-  '/basic/role': () => import('@/views/basic/role'),
-  '/basic/permission': () => import('@/views/basic/permission')
-}
+export const asyncRoutes = [
+  {
+    path: '/basic',
+    component: Layout,
+    name: '基础信息',
+    meta: {
+      title: '基础信息',
+      icon: 'list',
+      roles: [] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'admin',
+        name: 'Admin',
+        component: () => import('@/views/basic/admin'),
+        meta: { title: '管理员', icon: 'people' }
+      },
+      {
+        path: 'role',
+        name: 'Role',
+        component: () => import('@/views/basic/role'),
+        meta: { title: '角色', icon: 'peoples' }
+      },
+      {
+        path: 'permission',
+        name: 'Permission',
+        component: () => import('@/views/basic/permission'),
+        meta: { title: '权限', icon: 'lock' }
+      }
+    ]
+  },
+
+  // 404 page must be placed at the end !!!
+  { path: '*', redirect: '/404', hidden: true }
+]
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
