@@ -1,113 +1,109 @@
 <template>
   <div v-loading="loading" class="app-container">
-    <el-button type="success" @click="loadTable"> 刷新表格 </el-button>
-    <el-button type="primary" @click="handleCreate"> 添加角色 </el-button>
-    <el-table
-      :data="tableData"
-      border
-      style="width: 100%; margin-top: 10px"
-    >
-      <el-table-column
-        type="index"
-        label="序号"
-        width="50"
-        align="center"
-      />
-      <el-table-column
-        prop="name"
-        label="角色"
-        width="200"
-        align="center"
-      />
-      <el-table-column
-        prop="alias"
-        label="角色别名"
-        width="200"
-        align="center"
-      />
-      <el-table-column
-        label="角色描述"
-        width="250"
-        align="center"
+    <div>
+      <el-input v-model.trim="where.name" style="width: 200px" placeholder="角色" />
+      <el-input v-model.trim="where.alias" style="width: 200px" placeholder="别名" />
+      <el-button type="success" @click="loadTable"> 查询 </el-button>
+      <el-button type="primary" @click="handleCreate"> 添加角色 </el-button>
+    </div>
+    <div>
+      <el-table
+        :data="tableData"
+        border
+        style="width: 100%; margin-top: 10px"
       >
-        <template slot-scope="scope">
-          {{ scope.row.description | description }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        width="200"
-        align="center"
-      >
-        <template v-if="scope.row.create_time" slot-scope="scope">
-          {{ scope.row.create_time | formatDateTime }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="操作"
-        width="250"
-        align="center"
-      >
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="handleEdit(scope.row)"
-          >编辑
-          </el-button>
-          <el-button
-            size="mini"
-            type="primary"
-            @click="assignPermission(scope.row)"
-          >分配权限
-          </el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.row)"
-          >删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      style="margin-top: 10px"
-      :current-page="listQuery.page"
-      :page-size="listQuery.limit"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
-
-    <el-dialog title="角色信息" :visible.sync="showEdit">
-      <role-edit ref="roleEdit" :is-create="isCreate" @success="successEdit" />
-    </el-dialog>
-
-    <el-drawer
-      title="角色权限分配"
-      :visible.sync="showPermission"
-      direction="rtl"
-      size="30%"
-    >
-      <div>
-        <el-tree
-          ref="permission"
-          :data="treeData"
-          :props="defaultProps"
-          :default-checked-keys="checkPermissionIds"
-          show-checkbox
-          node-key="id"
-          default-expand-all
-          :expand-on-click-node="false"
+        <el-table-column
+          type="index"
+          label="序号"
+          width="50"
+          align="center"
         />
-        <div style="margin-top: 10px">
-          <el-button style="margin-left: 5px" class="button-class" @click="showPermission = false">取 消</el-button>
-          <el-button v-loading="permissionLoading" class="button-class" type="primary" @click="submitPermission">提 交</el-button>
+        <el-table-column
+          prop="name"
+          label="角色"
+          width="200"
+          align="center"
+        />
+        <el-table-column
+          prop="alias"
+          label="角色别名"
+          width="200"
+          align="center"
+        />
+        <el-table-column
+          label="角色描述"
+          width="250"
+          align="center"
+        >
+          <template v-if="scope.row.remark !== null" slot-scope="scope">
+            {{ scope.row.remark | remarkFormat }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          width="250"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.row)"
+            >编辑
+            </el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              @click="assignPermission(scope.row)"
+            >分配权限
+            </el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.row)"
+            >删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        style="margin-top: 10px"
+        :current-page="listQuery.page"
+        :page-size="listQuery.size"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+
+      <el-dialog title="角色信息" :visible.sync="showEdit" :close-on-click-modal="false">
+        <role-edit ref="roleEdit" :is-create="isCreate" @success="successEdit" />
+      </el-dialog>
+
+      <el-drawer
+        title="角色权限分配"
+        :visible.sync="showPermission"
+        direction="rtl"
+        size="30%"
+      >
+        <div>
+          <el-tree
+            ref="permission"
+            :data="treeData"
+            :props="defaultProps"
+            :default-checked-keys="checkPermissionIds"
+            show-checkbox
+            node-key="id"
+            default-expand-all
+            :expand-on-click-node="false"
+          />
+          <div style="margin-top: 10px">
+            <el-button style="margin-left: 5px" class="button-class" @click="showPermission = false">取 消</el-button>
+            <el-button v-loading="permissionLoading" class="button-class" type="primary" @click="submitPermission">提 交</el-button>
+          </div>
         </div>
-      </div>
-    </el-drawer>
-  </div>
-</template>
+      </el-drawer>
+    </div>
+    <div /></div></template>
 
 <script>
 
@@ -115,7 +111,7 @@ import RoleEdit from './components/RoleEdit'
 export default {
   name: 'Role',
   filters: {
-    description: function(desc) {
+    remarkFormat: function(desc) {
       if (desc.length > 8) {
         return desc.substring(0, 8) + '...'
       } else {
@@ -132,7 +128,11 @@ export default {
       total: 0,
       listQuery: {
         page: 1,
-        limit: 10
+        size: 10
+      },
+      where: {
+        name: null,
+        alias: null
       },
       loading: false,
       showEdit: false,
@@ -151,11 +151,11 @@ export default {
   },
   mounted() {
     this.loadTable()
-    this.loadPermission()
+    // this.loadPermission()
   },
   methods: {
     handleSizeChange(size) {
-      this.listQuery.limit = size
+      this.listQuery.size = size
       this.loadTable()
     },
     handleCurrentChange(page) {
@@ -166,16 +166,16 @@ export default {
     async loadTable() {
       this.loading = true
       try {
-        const { code, data, count } = await this.postRequest('/basic.role/table',
+        const { data } = await this.postRequest('/basic/role/table',
           {
             page: this.listQuery.page,
-            limit: this.listQuery.limit
+            size: this.listQuery.size,
+            name: this.where.name,
+            alias: this.where.alias
           })
 
-        if (code === 0) {
-          this.tableData = data
-          this.total = count
-        }
+        this.tableData = data.data
+        this.total = data.count
       } finally {
         this.loading = false
       }
@@ -217,7 +217,7 @@ export default {
         })
 
         this.loading = true
-        const data = await this.deleteRequest(`/basic.role/delete/${row.id}`)
+        const data = await this.deleteRequest(`/basic/role/delete/${row.id}`)
         this.loading = false
 
         this.$message({ message: data.msg, type: 'success' })

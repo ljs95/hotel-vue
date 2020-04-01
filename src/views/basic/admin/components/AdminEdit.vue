@@ -98,10 +98,10 @@ export default {
     }
   },
   mounted() {
-    // this.getRequest('/basic.admin/allRole')
-    //   .then((data) => {
-    //     this.roles = data.data
-    //   })
+    this.getRequest('/basic/role/all')
+      .then((data) => {
+        this.roles = data.data
+      })
   },
   methods: {
     // 加载管理员信息
@@ -115,6 +115,7 @@ export default {
         this.admin.nickname = data.nickname
         this.admin.enabled = data.enabled
         this.admin.userImg = data.userImg
+        this.admin.roleIds = data.roleIds
 
         this.loading = false
       } catch (e) {

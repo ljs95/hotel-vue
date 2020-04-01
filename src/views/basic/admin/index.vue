@@ -89,13 +89,13 @@
       <el-pagination
         style="margin-top: 10px"
         :current-page="listQuery.page"
-        :page-size="listQuery.limit"
+        :page-size="listQuery.size"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
-      <el-dialog title="用户信息" :visible.sync="showEdit">
+      <el-dialog title="用户信息" :visible.sync="showEdit" :close-on-click-modal="false">
         <admin-edit ref="adminEdit" :is-create="isCreate" @success="successEdit" />
       </el-dialog>
     </div>
@@ -116,7 +116,7 @@ export default {
       total: 0,
       listQuery: {
         page: 1,
-        limit: 10
+        size: 10
       },
       where: {
         username: null,
@@ -134,7 +134,7 @@ export default {
   },
   methods: {
     handleSizeChange(size) {
-      this.listQuery.limit = size
+      this.listQuery.size = size
       this.loadTable()
     },
     handleCurrentChange(page) {
@@ -146,7 +146,7 @@ export default {
       this.loading = true
       const { data } = await this.postRequest(`/basic/admin/table`, {
         page: this.listQuery.page,
-        size: this.listQuery.limit,
+        size: this.listQuery.size,
         username: this.where.username,
         nickname: this.where.nickname,
         enabled: this.where.enabled
