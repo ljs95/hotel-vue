@@ -12,13 +12,24 @@
       node-key="id"
       default-expand-all
       :expand-on-click-node="false"
-      :render-content="renderContent"
-    />
+    >
+      <span slot-scope="{ node, data }" style="flex: 1; display: flex; align-items: center; justify-content: space-between; font-size: 14px; padding-right: 8px;">
+        <span>
+          <span :title="data.url">{{ node.label }} ({{ data.url }})</span>
+        </span>
+        <span>
+          <el-button style="font-size: 12px;" type="text" @click="handleForm(node, data, 'add')">添加子菜单</el-button>
+          <el-button style="font-size: 12px;" type="text" @click="handleForm(node, data, 'edit')">编辑</el-button>
+          <el-button style="font-size: 12px;" type="text" @click="handleDel(node, data)">删除</el-button>
+        </span>
+      </span>
+    </el-tree>
 
     <el-dialog
       :title="formMap[formName]"
       :visible.sync="showForm"
       width="800px"
+      :close-on-click-modal="false"
     >
       <el-form ref="dataForm" :model="formData" :rules="formRule" label-width="80px">
         <el-form-item v-show="false" prop="id">
@@ -41,10 +52,10 @@
           <el-input v-model.trim="formData.name" auto-complete="off" />
         </el-form-item>
         <el-form-item label="启用" prop="enabled">
-          <el-switch v-model="formData.enabled" :active-value="1" :inactive-value="0" />
+          <el-switch v-model="formData.enabled" />
         </el-form-item>
-        <el-form-item label="排序号码" prop="list_order">
-          <el-input v-model.number="formData.list_order" />
+        <el-form-item label="排序号码" prop="listOrder">
+          <el-input v-model.number="formData.listOrder" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitForm">保存</el-button>
@@ -73,13 +84,13 @@ export default {
         pid: 0,
         url: null,
         name: null,
-        enabled: 1,
-        list_order: 0
+        enabled: true,
+        listOrder: 0
       },
       formRule: {
         url: [{ required: true, message: '请输入url', trigger: 'blur' }],
         name: [{ required: true, message: '请输入权限名', trigger: 'blur' }],
-        list_order: [{ required: true, message: '请输入排序号码', trigger: 'blur' }]
+        listOrder: [{ required: true, message: '请输入排序号码', trigger: 'blur' }]
       },
       formName: null,
       formMap: {
@@ -97,59 +108,45 @@ export default {
     async loadData() {
       this.loading = true
       try {
-        const { data } = await this.postRequest('/basic.permission')
-        this.treeData = data.tree_data
+        const { data } = await this.getRequest('/basic/permission/tree')
+        this.treeData = data
         this.selectParentData = [{ id: 0, name: '' }].concat(this.treeData)
       } finally {
         this.loading = false
       }
     },
-    /*eslint-disable */
-    renderContent (h, { node, data, store }) {
-      return (
-        <span style="flex: 1; display: flex; align-items: center; justify-content: space-between; font-size: 14px; padding-right: 8px;">
-        <span>
-        <span title={ data.url }>{node.label + '(' + data.url + ')'}</span>
-        </span>
-        <span>
-        <el-button style="font-size: 12px;" type="text" on-click={ () => this.handleForm(node, data, 'add') }>添加子菜单</el-button>
-      <el-button style="font-size: 12px;" type="text" on-click={ () => this.handleForm(node, data, 'edit') }>编辑</el-button>
-      <el-button style="font-size: 12px;" type="text" on-click={ () => this.handleDel(node, data) }>删除</el-button>
-      </span>
-      </span>)
-    },
     // 显示表单
     handleForm(node, data, formName) {
       this.formName = formName
       this.showForm = true
-      if (formName === "edit") {
+      if (formName === 'edit') {
         this.formData = Object.assign({}, data)
       } else {
         this.$nextTick(() => {
-          this.$refs["dataForm"].resetFields()
+          this.$refs['dataForm'].resetFields()
           if (data !== null) {
             this.formData.pid = data.id
             this.formData.url = data.url
-            this.formData.list_order = data.list_order
+            this.formData.listOrder = data.listOrder
           }
         })
       }
 
       // 清空验证信息表单
-      if (this.$refs["dataForm"]) {
-        this.$refs["dataForm"].clearValidate()
+      if (this.$refs['dataForm']) {
+        this.$refs['dataForm'].clearValidate()
       }
     },
     async handleDel(node, data) {
       try {
-        await this.$confirm("确定要删除该权限吗", '提示', {
+        await this.$confirm('确定要删除该权限吗', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
           center: true
         })
         this.loading = true
-        const { msg } = await this.deleteRequest(`/basic.permission/delete/${data.id}`)
+        const { msg } = await this.deleteRequest(`/basic/permission/delete/${data.id}`)
 
         this.$message({ message: msg, type: 'success' })
         this.loadData()
@@ -160,19 +157,19 @@ export default {
       }
     },
     handlerPidChange(data) {
-      this.formData.pid = data[data.length-1]
+      this.formData.pid = data[data.length - 1]
     },
     async submitForm() {
       try {
         await this.$refs['dataForm'].validate()
         this.loading = true
 
-        if ( this.formName === 'add' ) {
-          const {msg} = await this.putRequest('/basic.permission/create', this.formData)
-          this.$message({message: msg, type: 'success'})
+        if (this.formName === 'add') {
+          const { msg } = await this.putRequest('/basic/permission/create', this.formData)
+          this.$message({ message: msg, type: 'success' })
         } else {
-          const {msg} = await this.putRequest('/basic.permission/update/', this.formData)
-          this.$message({message: msg, type: 'success'})
+          const { msg } = await this.postRequest('/basic/permission/update', this.formData)
+          this.$message({ message: msg, type: 'success' })
         }
 
         this.loadData()

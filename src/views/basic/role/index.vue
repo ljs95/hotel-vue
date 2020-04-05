@@ -90,7 +90,7 @@
             ref="permission"
             :data="treeData"
             :props="defaultProps"
-            :default-checked-keys="checkPermissionIds"
+            v-loading="treeLoading"
             show-checkbox
             node-key="id"
             default-expand-all
@@ -103,7 +103,9 @@
         </div>
       </el-drawer>
     </div>
-    <div /></div></template>
+    <div />
+  </div>
+</template>
 
 <script>
 
@@ -135,6 +137,7 @@ export default {
         alias: null
       },
       loading: false,
+      treeLoading: false,
       showEdit: false,
       isCreate: true,
       showPermission: false,
@@ -145,13 +148,12 @@ export default {
         children: 'children',
         label: 'name'
       },
-      permissionRoleId: null, // 修改权限的角色id
-      checkPermissionIds: []
+      permissionRoleId: null // 修改权限的角色id
     }
   },
   mounted() {
     this.loadTable()
-    // this.loadPermission()
+    this.loadPermission()
   },
   methods: {
     handleSizeChange(size) {
@@ -181,7 +183,7 @@ export default {
       }
     },
     async loadPermission() {
-      const { data } = await this.getRequest('/basic.role/permissionAll')
+      const { data } = await this.getRequest('/basic/role/permissionTree')
       this.treeData = data
     },
     handleCreate() {
@@ -196,16 +198,24 @@ export default {
       })
     },
     // 打开分配权限页面
-    assignPermission(row) {
+    async assignPermission(row) {
       this.showPermission = true
       this.permissionRoleId = row.id
 
-      // 默认选中的权限id列表
-      const checkedIds = []
-      row.permissions.forEach((item) => {
-        checkedIds.push(item.id)
-      })
-      this.checkPermissionIds = checkedIds
+      try {
+        this.treeLoading = true
+        const { data } = await this.getRequest(`/basic/role/permissions/${row.id}`)
+
+        // 默认选中的权限id列表
+        const checkedIds = []
+        data.forEach((item) => {
+          checkedIds.push(item.id)
+        })
+
+        this.$refs.permission.setCheckedKeys(checkedIds)
+      } finally {
+        this.treeLoading = false
+      }
     },
     // 删除角色
     async handleDelete(row) {
@@ -235,7 +245,7 @@ export default {
       const permissionIds = this.$refs['permission'].getCheckedKeys()
       this.permissionLoading = true
       try {
-        const { msg } = await this.postRequest('/basic.role/editPermission', {
+        const { msg } = await this.postRequest('/basic/role/editPermission', {
           id: this.permissionRoleId,
           permissionIds: permissionIds
         })
