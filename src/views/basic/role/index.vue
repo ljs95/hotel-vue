@@ -4,7 +4,7 @@
       <el-input v-model.trim="where.name" style="width: 200px" placeholder="角色" />
       <el-input v-model.trim="where.alias" style="width: 200px" placeholder="别名" />
       <el-button type="success" @click="loadTable"> 查询 </el-button>
-      <el-button type="primary" @click="handleCreate"> 添加角色 </el-button>
+      <el-button v-permission="['/basic/role/create']" type="primary" @click="handleCreate"> 添加角色 </el-button>
     </div>
     <div>
       <el-table
@@ -40,23 +40,27 @@
           </template>
         </el-table-column>
         <el-table-column
+          v-if="checkPermission(['/basic/role/update', '/basic/role/delete', '/basic/role/editPermission'])"
           label="操作"
           width="250"
           align="center"
         >
           <template slot-scope="scope">
             <el-button
+              v-permission="['/basic/role/update']"
               size="mini"
               @click="handleEdit(scope.row)"
             >编辑
             </el-button>
             <el-button
+              v-permission="['/basic/role/editPermission']"
               size="mini"
               type="primary"
               @click="assignPermission(scope.row)"
             >分配权限
             </el-button>
             <el-button
+              v-permission="['/basic/role/delete']"
               size="mini"
               type="danger"
               @click="handleDelete(scope.row)"

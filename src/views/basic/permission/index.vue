@@ -3,7 +3,7 @@
     <el-form :inline="true" class="query-form" size="mini">
       <el-form-item>
         <el-button type="success" icon="search" @click="loadData">刷新</el-button>
-        <el-button type="primary" @click.native="handleForm(null, null, 'add')">新增</el-button>
+        <el-button v-permission="['/basic/permission/create']" type="primary" @click.native="handleForm(null, null, 'add')">新增</el-button>
       </el-form-item>
     </el-form>
     <el-tree
@@ -18,9 +18,9 @@
           <span :title="data.url">{{ node.label }} ({{ data.url }})</span>
         </span>
         <span>
-          <el-button style="font-size: 12px;" type="text" @click="handleForm(node, data, 'add')">添加子菜单</el-button>
-          <el-button style="font-size: 12px;" type="text" @click="handleForm(node, data, 'edit')">编辑</el-button>
-          <el-button style="font-size: 12px;" type="text" @click="handleDel(node, data)">删除</el-button>
+          <el-button v-permission="['/basic/permission/create']" style="font-size: 12px;" type="text" @click="handleForm(node, data, 'add')">添加子菜单</el-button>
+          <el-button v-permission="['/basic/permission/update']" style="font-size: 12px;" type="text" @click="handleForm(node, data, 'edit')">编辑</el-button>
+          <el-button v-permission="['/basic/permission/delete']" style="font-size: 12px;" type="text" @click="handleDel(node, data)">删除</el-button>
         </span>
       </span>
     </el-tree>

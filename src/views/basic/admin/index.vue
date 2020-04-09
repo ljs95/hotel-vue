@@ -4,11 +4,11 @@
       <el-input v-model.trim="where.username" style="width: 200px" placeholder="账号" />
       <el-input v-model.trim="where.nickname" style="width: 200px" placeholder="昵称" />
       <el-select v-model="where.enabled" style="width: 200px" placeholder="启/禁用">
-        <el-option label="启用" value="true"/>
-        <el-option label="禁用" value="false"/>
+        <el-option label="启用" value="true" />
+        <el-option label="禁用" value="false" />
       </el-select>
       <el-button type="success" @click="loadTable"> 查询</el-button>
-      <el-button type="primary" @click="handleCreate"> 添加用户</el-button>
+      <el-button v-permission="['/basic/admin/create']" type="primary" @click="handleCreate"> 添加用户</el-button>
     </div>
     <div>
       <el-table
@@ -56,6 +56,7 @@
           </template>
         </el-table-column>
         <el-table-column
+          v-if="checkPermission(['/basic/admin/enabled'])"
           label="启/禁用操作"
           width="200"
           align="center"
@@ -67,17 +68,20 @@
           </template>
         </el-table-column>
         <el-table-column
+          v-if="checkPermission(['/basic/admin/update', '/basic/admin/delete'])"
           label="操作"
           width="250"
           align="center"
         >
           <template slot-scope="scope">
             <el-button
+              v-permission="['/basic/admin/update']"
               size="mini"
               @click="handleEdit(scope.row)"
             >编辑
             </el-button>
             <el-button
+              v-permission="['/basic/admin/delete']"
               size="mini"
               type="danger"
               @click="handleDelete(scope.row)"

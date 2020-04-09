@@ -70,29 +70,32 @@ export const asyncRoutes = [
     path: '/basic',
     component: Layout,
     name: '基础信息',
+    alwaysShow: true,
     meta: {
       title: '基础信息',
       icon: 'list',
-      roles: [] // you can set roles in root nav
+      meta: {
+        permission: '/basic'
+      }
     },
     children: [
       {
         path: 'admin',
         name: 'Admin',
         component: () => import('@/views/basic/admin'),
-        meta: { title: '管理员', icon: 'people' }
+        meta: { title: '管理员', icon: 'people', permission: '/basic/admin/table' }
       },
       {
         path: 'role',
         name: 'Role',
         component: () => import('@/views/basic/role'),
-        meta: { title: '角色', icon: 'peoples' }
+        meta: { title: '角色', icon: 'peoples', permission: '/basic/role/table' }
       },
       {
         path: 'permission',
         name: 'Permission',
         component: () => import('@/views/basic/permission'),
-        meta: { title: '权限', icon: 'lock' }
+        meta: { title: '权限', icon: 'lock', permission: '/basic/permission/tree' }
       }
     ]
   },

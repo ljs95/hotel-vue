@@ -12,6 +12,9 @@ import { customRequest, deleteRequest, getRequest, postRequest, putRequest } fro
 import '@/icons' // icon
 import '@/permission' // permission control
 import '@/utils/filter-util.js'
+import permission from '@/directive/permission/index.js' // 权限判断指令
+import checkPermission from '@/utils/permission' // 权限判断函数
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -30,7 +33,8 @@ if (process.env.NODE_ENV === 'production') {
 // Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
 Vue.use(ElementUI)
-
+Vue.directive('permission', permission)
+Vue.prototype.checkPermission = checkPermission
 Vue.prototype.getRequest = getRequest
 Vue.prototype.postRequest = postRequest
 Vue.prototype.putRequest = putRequest

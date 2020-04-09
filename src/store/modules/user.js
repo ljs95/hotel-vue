@@ -7,7 +7,8 @@ const getDefaultState = () => {
     token: getToken(),
     name: '',
     avatar: '',
-    roles: []
+    roles: [],
+    permissions: []
   }
 }
 
@@ -28,7 +29,10 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
-  }
+  },
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions
+  },
 }
 
 const actions = {
@@ -57,22 +61,16 @@ const actions = {
           reject('验证失败，请重新登录.')
         }
 
-        const { roles, nickname, userImg } = data
+        const { roles, nickname, userImg, permissions } = data
 
         if (!roles || roles.length <= 0) {
           reject('getInfo：角色必须为非null数组')
         }
 
-        const roleNames = []
-        roles.forEach((item) => {
-          roleNames.push(item.name)
-        })
-
-        data.roles = roleNames
-
         commit('SET_ROLES', roles)
         commit('SET_NAME', nickname)
         commit('SET_AVATAR', userImg)
+        commit('SET_PERMISSIONS', permissions)
         resolve(data)
       }).catch(error => {
         reject(error)
