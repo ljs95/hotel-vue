@@ -84,6 +84,9 @@ export default {
         nickname: [
           { required: true, message: '请输入昵称', trigger: 'blur' },
           { max: 20, message: '长度在 20 个字符内', trigger: 'blur' }
+        ],
+        roleIds: [
+          { required: true, message: '角色选项不能为空', trigger: 'blur' }
         ]
       },
       file: null,

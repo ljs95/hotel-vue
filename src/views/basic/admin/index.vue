@@ -35,6 +35,20 @@
           align="center"
         />
         <el-table-column
+          label="角色"
+          width="200"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <span v-if="scope.row.roles.length === 1">
+              {{ scope.row.roles[0].alias }}
+            </span>
+            <span v-else>
+              {{ scope.row.roles[0].alias }}, ...
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="头像"
           width="100"
           align="center"
