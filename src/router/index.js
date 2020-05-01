@@ -99,6 +99,33 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/room',
+    component: Layout,
+    name: '客房管理',
+    alwaysShow: true,
+    meta: {
+      title: '客房管理',
+      icon: 'list',
+      meta: {
+        permission: '/room'
+      }
+    },
+    children: [
+      {
+        path: 'room_type',
+        name: 'RoomType',
+        component: () => import('@/views/room/type'),
+        meta: { title: '房型', icon: 'people', permission: '/room/type/table' }
+      },
+      {
+        path: 'room',
+        name: 'Room',
+        component: () => import('@/views/room/room'),
+        meta: { title: '房间', icon: 'people', permission: '/room/room/table' }
+      }
+    ]
+  },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

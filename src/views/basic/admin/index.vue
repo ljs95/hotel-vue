@@ -106,7 +106,7 @@
       </el-table>
       <el-pagination
         style="margin-top: 10px"
-        :current-page="listQuery.page"
+        :current-page="listQuery.current"
         :page-size="listQuery.size"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -133,7 +133,7 @@ export default {
       tableData: [],
       total: 0,
       listQuery: {
-        page: 1,
+        current: 1,
         size: 10
       },
       where: {
@@ -155,15 +155,15 @@ export default {
       this.listQuery.size = size
       this.loadTable()
     },
-    handleCurrentChange(page) {
-      this.listQuery.page = page
+    handleCurrentChange(current) {
+      this.listQuery.current = current
       this.loadTable()
     },
     // 加载table数据
     async loadTable() {
       this.loading = true
       const { data } = await this.postRequest(`/basic/admin/table`, {
-        page: this.listQuery.page,
+        current: this.listQuery.current,
         size: this.listQuery.size,
         username: this.where.username,
         nickname: this.where.nickname,
