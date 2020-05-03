@@ -2,7 +2,7 @@
   <div v-loading="loading" class="app-container">
     <div>
       <el-select v-model="where.typeId" placeholder="房型">
-        <el-option value=""/>
+        <el-option value="" />
         <el-option
           v-for="item in roomTypeList"
           :key="item.id"
@@ -11,7 +11,7 @@
         />
       </el-select>
       <el-select v-model="where.status" placeholder="状态">
-        <el-option value=""/>
+        <el-option value="" />
         <el-option
           v-for="(name, key) in statusList"
           :key="key"
@@ -81,15 +81,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        style="margin-top: 10px"
-        :current-page="listQuery.current"
-        :page-size="listQuery.size"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <pagination :current.sync="listQuery.current" :size.sync="listQuery.size" :total="total" @load="loadTable" />
       <el-dialog title="房间" :visible.sync="showEdit" width="500px" :close-on-click-modal="false">
         <room-edit ref="RoomEdit" :room-type-list="roomTypeList" :status-list="statusList" :is-create="isCreate" @success="successEdit" />
       </el-dialog>
@@ -99,11 +91,13 @@
 
 <script>
 import RoomEdit from './components/RoomEdit'
+import Pagination from '@/components/Public/Pagination'
 
 export default {
   name: 'Room',
   components: {
-    RoomEdit
+    RoomEdit,
+    Pagination
   },
   data() {
     return {
@@ -133,14 +127,6 @@ export default {
       const { data } = await this.getRequest('/room/room/index')
       this.roomTypeList = data.roomTypeList
       this.statusList = data.statusList
-    },
-    handleSizeChange(size) {
-      this.listQuery.size = size
-      this.loadTable()
-    },
-    handleCurrentChange(current) {
-      this.listQuery.current = current
-      this.loadTable()
     },
     // 加载table数据
     async loadTable() {

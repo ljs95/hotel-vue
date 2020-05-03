@@ -69,15 +69,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        style="margin-top: 10px"
-        :current-page="listQuery.current"
-        :page-size="listQuery.size"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <pagination :current.sync="listQuery.current" :size.sync="listQuery.size" :total="total" @load="loadTable" />
 
       <el-dialog title="角色信息" :visible.sync="showEdit" :close-on-click-modal="false">
         <role-edit ref="roleEdit" :is-create="isCreate" @success="successEdit" />
@@ -92,9 +84,9 @@
         <div>
           <el-tree
             ref="permission"
+            v-loading="treeLoading"
             :data="treeData"
             :props="defaultProps"
-            v-loading="treeLoading"
             show-checkbox
             node-key="id"
             default-expand-all
@@ -113,6 +105,7 @@
 
 <script>
 
+import Pagination from '@/components/Public/Pagination'
 import RoleEdit from './components/RoleEdit'
 export default {
   name: 'Role',
@@ -126,7 +119,8 @@ export default {
     }
   },
   components: {
-    RoleEdit
+    RoleEdit,
+    Pagination
   },
   data() {
     return {
@@ -160,14 +154,6 @@ export default {
     this.loadPermission()
   },
   methods: {
-    handleSizeChange(size) {
-      this.listQuery.size = size
-      this.loadTable()
-    },
-    handleCurrentChange(current) {
-      this.listQuery.current = current
-      this.loadTable()
-    },
     // 加载table数据
     async loadTable() {
       this.loading = true

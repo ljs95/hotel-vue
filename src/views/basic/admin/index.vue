@@ -104,15 +104,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        style="margin-top: 10px"
-        :current-page="listQuery.current"
-        :page-size="listQuery.size"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <pagination :current.sync="listQuery.current" :size.sync="listQuery.size" :total="total" @load="loadTable" />
       <el-dialog title="用户信息" :visible.sync="showEdit" :close-on-click-modal="false">
         <admin-edit ref="adminEdit" :is-create="isCreate" @success="successEdit" />
       </el-dialog>
@@ -121,12 +113,14 @@
 </template>
 
 <script>
+import Pagination from '@/components/Public/Pagination'
 import AdminEdit from './components/AdminEdit'
 
 export default {
   name: 'Admin',
   components: {
-    AdminEdit
+    AdminEdit,
+    Pagination
   },
   data() {
     return {
@@ -151,14 +145,6 @@ export default {
     this.loadTable()
   },
   methods: {
-    handleSizeChange(size) {
-      this.listQuery.size = size
-      this.loadTable()
-    },
-    handleCurrentChange(current) {
-      this.listQuery.current = current
-      this.loadTable()
-    },
     // 加载table数据
     async loadTable() {
       this.loading = true

@@ -51,15 +51,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        style="margin-top: 10px"
-        :current-page="listQuery.current"
-        :page-size="listQuery.size"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <pagination :current.sync="listQuery.current" :size.sync="listQuery.size" :total="total" @load="loadTable"/>
       <el-dialog title="房型信息" :visible.sync="showEdit" width="500px" :close-on-click-modal="false">
         <room-type-edit ref="RoomTypeEdit" :is-create="isCreate" @success="successEdit" />
       </el-dialog>
@@ -69,11 +61,13 @@
 
 <script>
 import RoomTypeEdit from './components/RoomTypeEdit'
+import Pagination from '@/components/Public/Pagination'
 
 export default {
   name: 'RoomType',
   components: {
-    RoomTypeEdit
+    RoomTypeEdit,
+    Pagination
   },
   data() {
     return {
@@ -93,14 +87,6 @@ export default {
     this.loadTable()
   },
   methods: {
-    handleSizeChange(size) {
-      this.listQuery.size = size
-      this.loadTable()
-    },
-    handleCurrentChange(current) {
-      this.listQuery.current = current
-      this.loadTable()
-    },
     // 加载table数据
     async loadTable() {
       this.loading = true
