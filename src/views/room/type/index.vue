@@ -29,20 +29,28 @@
           align="center"
         />
         <el-table-column
-          v-if="checkPermission(['/basic/admin/update', '/basic/admin/delete'])"
+          v-if="checkPermission(['/room/type/update', '/room/type/applySpec', '/room/type/delete'])"
           label="操作"
           width="250"
           align="center"
         >
           <template slot-scope="scope">
             <el-button
-              v-permission="['/basic/admin/update']"
+              v-permission="['/room/type/update']"
               size="mini"
+              type="primary"
               @click="handleEdit(scope.row)"
             >编辑
             </el-button>
             <el-button
-              v-permission="['/basic/admin/delete']"
+              v-permission="['/room/type/applySpec']"
+              size="mini"
+              type="success"
+              @click="handleSpec(scope.row)"
+            >应用规格
+            </el-button>
+            <el-button
+              v-permission="['/room/type/delete']"
               size="mini"
               type="danger"
               @click="handleDelete(scope.row)"
@@ -54,6 +62,16 @@
       <pagination :current.sync="listQuery.current" :size.sync="listQuery.size" :total="total" @load="loadTable"/>
       <el-dialog title="房型信息" :visible.sync="showEdit" width="500px" :close-on-click-modal="false">
         <room-type-edit ref="RoomTypeEdit" :is-create="isCreate" @success="successEdit" />
+      </el-dialog>
+      <el-dialog title="应用规格" :visible.sync="showSpec" width="500px" :close-on-click-modal="false">
+        <el-select v-model="applySpecId" style="width: 100%" placeholder="规格" @change="changeSpec">
+          <el-option
+            v-for="item in specList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-dialog>
     </div>
   </div>
@@ -77,16 +95,24 @@ export default {
         current: 1,
         size: 10
       },
-      enabledList: [],
+      specList: [],
       loading: false,
       showEdit: false,
-      isCreate: true
+      showSpec: false,
+      isCreate: true,
+      typeId: null,
+      applySpecId: null
     }
   },
   mounted() {
+    this.init()
     this.loadTable()
   },
   methods: {
+    async init() {
+      const { data } = await this.getRequest('/room/type/index')
+      this.specList = data.specList
+    },
     // 加载table数据
     async loadTable() {
       this.loading = true
@@ -109,6 +135,22 @@ export default {
         this.$refs.RoomTypeEdit.loadInfo(row.id)
       })
     },
+    handleSpec(row) {
+      this.typeId = row.id
+      this.showSpec = true
+    },
+    // 应用规格
+    async changeSpec(specId) {
+      try {
+        this.loading = true
+        const { msg } = await this.postRequest(`/room/type/applySpec/${this.typeId}/${specId}`)
+        this.showSpec = false
+        this.$message({ message: msg, type: 'success' })
+        this.loadTable()
+      } finally {
+        this.loading = false
+      }
+    },
     // 删除房型
     async handleDelete(row) {
       try {
@@ -119,10 +161,10 @@ export default {
         })
 
         this.loading = true
-        const data = await this.deleteRequest(`/basic/admin/delete/${row.id}`)
+        const { msg } = await this.deleteRequest(`/room/type/delete/${row.id}`)
         this.loading = false
 
-        this.$message({ message: data.msg, type: 'success' })
+        this.$message({ message: msg, type: 'success' })
         this.loadTable()
       } catch (e) {
         this.loading = false

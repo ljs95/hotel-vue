@@ -10,17 +10,8 @@
           :value="item.id"
         />
       </el-select>
-      <el-select v-model="where.status" placeholder="状态">
-        <el-option value="" />
-        <el-option
-          v-for="(name, key) in statusList"
-          :key="key"
-          :label="name"
-          :value="key"
-        />
-      </el-select>
       <el-button type="success" @click="loadTable">查询</el-button>
-      <el-button v-permission="['/room/room/create']" type="primary" @click="handleCreate">添加房间</el-button>
+      <el-button v-permission="['/room/spec/create']" type="primary" @click="handleCreate">添加房间</el-button>
     </div>
     <div>
       <el-table
@@ -36,7 +27,7 @@
         />
         <el-table-column
           prop="name"
-          label="房间"
+          label="规格"
           width="200"
           align="center"
         />
@@ -47,33 +38,57 @@
           align="center"
         />
         <el-table-column
-          prop="floor"
-          label="楼层"
+          label="押金"
           width="100"
           align="center"
-        />
+        >
+          <template slot-scope="scope">
+            {{ scope.row.price.deposit | priceFenToYuan}} 元
+          </template>
+        </el-table-column>
         <el-table-column
-          prop="statusDesc"
-          label="状态"
+          label="全日房价格"
           width="100"
           align="center"
-        />
+        >
+          <template slot-scope="scope">
+            {{ scope.row.price.day | priceFenToYuan}} 元
+          </template>
+        </el-table-column>
         <el-table-column
-          v-if="checkPermission(['/room/room/update', '/room/room/delete'])"
+          label="全日房续时价格"
+          width="130"
+          align="center"
+        >
+          <template slot-scope="scope">
+            {{ scope.row.price.dayContinueHour | priceFenToYuan}} 元
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="钟点房价格"
+          width="100"
+          align="center"
+        >
+          <template slot-scope="scope">
+            {{ scope.row.price.hour | priceFenToYuan}} 元
+          </template>
+        </el-table-column>
+        <el-table-column
+          v-if="checkPermission(['/room/spec/update', '/room/spec/delete'])"
           label="操作"
           width="250"
           align="center"
         >
           <template slot-scope="scope">
             <el-button
-              v-permission="['/room/room/update']"
+              v-permission="['/room/spec/update']"
               size="mini"
               type="primary"
               @click="handleEdit(scope.row)"
             >编辑
             </el-button>
             <el-button
-              v-permission="['/room/room/delete']"
+              v-permission="['/room/spec/delete']"
               size="mini"
               type="danger"
               @click="handleDelete(scope.row)"
@@ -83,21 +98,21 @@
         </el-table-column>
       </el-table>
       <pagination :current.sync="listQuery.current" :size.sync="listQuery.size" :total="total" @load="loadTable" />
-      <el-dialog title="房间" :visible.sync="showEdit" width="500px" :close-on-click-modal="false">
-        <room-edit ref="RoomEdit" :room-type-list="roomTypeList" :status-list="statusList" :is-create="isCreate" @success="successEdit" />
+      <el-dialog title="房型规格" :visible.sync="showEdit" width="500px" :close-on-click-modal="false">
+        <room-spec-edit ref="RoomSpecEdit" :room-type-list="roomTypeList" :is-create="isCreate" @success="successEdit" />
       </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
-import RoomEdit from './components/RoomEdit'
+import RoomSpecEdit from './components/RoomSpecEdit'
 import Pagination from '@/components/Public/Pagination'
 
 export default {
-  name: 'Room',
+  name: 'RoomSpec',
   components: {
-    RoomEdit,
+    RoomSpecEdit,
     Pagination
   },
   data() {
@@ -109,11 +124,9 @@ export default {
         size: 10
       },
       where: {
-        typeId: null,
-        status: null
+        typeId: null
       },
       roomTypeList: [],
-      statusList: [],
       loading: false,
       showEdit: false,
       isCreate: true
@@ -125,18 +138,16 @@ export default {
   },
   methods: {
     async init() {
-      const { data } = await this.getRequest('/room/room/index')
+      const { data } = await this.getRequest('/room/spec/index')
       this.roomTypeList = data.roomTypeList
-      this.statusList = data.statusList
     },
     // 加载table数据
     async loadTable() {
       this.loading = true
-      const { data } = await this.postRequest(`/room/room/table`, {
+      const { data } = await this.postRequest(`/room/spec/table`, {
         current: this.listQuery.current,
         size: this.listQuery.size,
-        typeId: this.where.typeId,
-        status: this.where.status
+        typeId: this.where.typeId
       })
       this.tableData = data.data
       this.total = data.count
@@ -150,20 +161,19 @@ export default {
       this.showEdit = true
       this.isCreate = false
       this.$nextTick(() => {
-        this.$refs.RoomEdit.loadInfo(row.id)
+        this.$refs.RoomSpecEdit.loadInfo(row.id)
       })
     },
-    // 删除房间
     async handleDelete(row) {
       try {
-        await this.$confirm('是否要删除该房间', '提示', {
+        await this.$confirm('是否要删除该房型规格', '提示', {
           confirmButtonText: '确定',
           type: 'warning',
           center: true
         })
 
         this.loading = true
-        const data = await this.deleteRequest(`/room/room/delete/${row.id}`)
+        const data = await this.deleteRequest(`/room/spec/delete/${row.id}`)
         this.loading = false
 
         this.$message({ message: data.msg, type: 'success' })
@@ -172,7 +182,6 @@ export default {
         this.loading = false
       }
     },
-    // 房间更新后的回调方法
     successEdit() {
       this.showEdit = false
       this.loadTable()

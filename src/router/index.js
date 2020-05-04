@@ -80,19 +80,19 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: 'admin',
+        path: 'basic/admin',
         name: 'Admin',
         component: () => import('@/views/basic/admin'),
         meta: { title: '管理员', icon: 'people', permission: '/basic/admin/table' }
       },
       {
-        path: 'role',
+        path: 'basic/role',
         name: 'Role',
         component: () => import('@/views/basic/role'),
         meta: { title: '角色', icon: 'peoples', permission: '/basic/role/table' }
       },
       {
-        path: 'permission',
+        path: 'basic/permission',
         name: 'Permission',
         component: () => import('@/views/basic/permission'),
         meta: { title: '权限', icon: 'lock', permission: '/basic/permission/tree' }
@@ -113,16 +113,22 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: 'room_type',
+        path: 'room/room_type',
         name: 'RoomType',
         component: () => import('@/views/room/type'),
         meta: { title: '房型', icon: 'people', permission: '/room/type/table' }
       },
       {
-        path: 'room',
+        path: 'room/room',
         name: 'Room',
         component: () => import('@/views/room/room'),
         meta: { title: '房间', icon: 'people', permission: '/room/room/table' }
+      },
+      {
+        path: 'room/room_spec',
+        name: 'Room',
+        component: () => import('@/views/room/spec'),
+        meta: { title: '规格', icon: 'people', permission: '/room/spec/table' }
       }
     ]
   },
