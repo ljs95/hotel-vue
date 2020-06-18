@@ -132,7 +132,27 @@ export const asyncRoutes = [
       }
     ]
   },
-
+  {
+    path: '/housing',
+    component: Layout,
+    name: '入住管理',
+    alwaysShow: true,
+    meta: {
+      title: '入住管理',
+      icon: 'list',
+      meta: {
+        permission: '/housing'
+      }
+    },
+    children: [
+      {
+        path: 'housing/open_room',
+        name: 'openRoom',
+        component: () => import('@/views/housing/open'),
+        meta: { title: '开房', icon: 'people', permission: '/housing/open/index' }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
